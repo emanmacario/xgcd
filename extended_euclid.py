@@ -32,8 +32,12 @@ def extended_gcd(a, b):
     print("Quotient by the gcd: {:d} {:d}".format(t, s))
 
 
-
 def multiplicative_inverse(a, b):
+    """
+    :param a:
+    :param b:
+    :return:
+    """
     # Should consider the case when a < n
     s = 0
     r = b
@@ -53,6 +57,8 @@ def multiplicative_inverse(a, b):
     print("Bezout coefficients: {:d} {:d}".format(old_s, bezout_t))
     print("Greatest common divisor:", old_r)
 
+    return old_s
+
 
 if __name__ == "__main__":
     a = 156
@@ -60,3 +66,6 @@ if __name__ == "__main__":
     extended_gcd(b, a)
     print("\n")
     multiplicative_inverse(a, b)
+
+    print('\n')
+    multiplicative_inverse(1473, 1562)

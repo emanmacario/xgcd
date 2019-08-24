@@ -3,6 +3,7 @@ import string
 import textwrap
 import math
 
+from extended_euclid import multiplicative_inverse
 
 m = 4
 
@@ -24,6 +25,12 @@ plaintexts = ['CTRL', 'CAPS', 'HOME', 'PGUP']
 ciphertexts = ['HGPP', 'HOFL', 'TTSI', 'DACR']
 
 
+def convert_to_row(text):
+    """
+    :param text:
+    :return:
+    """
+    return np.array([p_map[p] for p in text], dtype=np.int64)
 
 
 def convert_to_matrix(texts):
@@ -33,10 +40,9 @@ def convert_to_matrix(texts):
     """
     matrix = []
     for text in texts:
-        row = [p_map[p] for p in text]
+        row = convert_to_row(text)
         matrix.append(row)
     return np.array(matrix, dtype=np.int64)
-
 
 
 def encrypt(plaintext, key):
@@ -45,7 +51,7 @@ def encrypt(plaintext, key):
     :param key:
     :return:
     """
-    p = np.array([p_map[p] for p in plaintext], dtype=np.int64)
+    p = convert_to_row(plaintext)
     c = np.dot(p, key) % 31
     return ''.join([c_map[round(n) % 31] for n in c])
 
@@ -69,7 +75,8 @@ def main():
     X = convert_to_matrix(plaintexts)
     Y = convert_to_matrix(ciphertexts)
 
-    K = np.dot(np.linalg.inv(X), Y) % 31
+    K = np.dot(np.linalg.inv(X) % 31, Y) % 31
+    print(K)
     print(encrypt('CTRL', K))
     print(encrypt('CAPS', K))
     print(encrypt('HOME', K))
@@ -84,10 +91,63 @@ def main():
     print(test_plaintext)
     """
 
-    for ciphertext in ciphertexts:
-        print(decrypt(ciphertext, K))
 
+def sub_matrix(matrix, i, j):
+    """
+    Return sub-matrix formed by deleting jth
+    row and ith column
+    :param matrix:
+    :param i:
+    :param j:
+    :return:
+    """
+    tmp = np.delete(matrix, j, 0)
+    return np.delete(tmp, i, 1)
+
+
+def sub_determinant(matrix, i, j, mod=31):
+    """
+    Returns sub-determinant formed by deleting the
+    jth row and ith column of A, mod 31
+    :param matrix:
+    :param i: column index
+    :param j: row index
+    :param mod: mod (optional)
+    :return: sub-determinant
+    """
+    sm = sub_matrix(matrix, i, j)
+    return int(round(np.linalg.det(sm))) % mod
 
 
 if __name__ == "__main__":
-    main()
+    K = np.array([[17, 17, 5],
+                  [21, 18, 21],
+                  [2, 2, 19]])
+    """
+    sm = sub_matrix(K, 1, 2)
+    print(sm)
+    dsm = sub_determinant(K, 1, 2)
+    print(dsm)
+    exit(1)
+    """
+
+
+    print(K)
+    det_K = int(round(np.linalg.det(K))) % 26
+    print("Determinant of K = ", det_K)
+    m_inv = multiplicative_inverse(det_K, 26) % 26
+    print("(det K)^-1 mod 26 = ", m_inv)
+
+    inverse = [[] for _ in range(3)]
+    print(inverse)
+    for a in range(3):
+        for b in range(3):
+            inverse[a].append(m_inv * (-1)**(a+b) * sub_determinant(K, a, b, 26))
+
+    inverse = np.array(inverse) % 26
+    print("K^-1 = \n", inverse)
+    print("K * K^-1 = \n", np.dot(K, inverse) % 26)
+
+
+
+
