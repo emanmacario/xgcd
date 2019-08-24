@@ -53,7 +53,7 @@ def encrypt(plaintext, key):
     """
     p = convert_to_row(plaintext)
     c = np.dot(p, key) % 31
-    return ''.join([c_map[round(n) % 31] for n in c])
+    return ''.join([c_map[n] for n in c])
 
 
 def decrypt(ciphertext, key):
@@ -63,33 +63,8 @@ def decrypt(ciphertext, key):
     :return:
     """
     c = np.array([p_map[c] for c in ciphertext], dtype=np.int64)
-    p = np.dot(c, np.linalg.inv(key) % 31) % 31
-    print(p)
-    return ''.join([c_map[round(n) % 31] for n in p])
-
-
-def main():
-    #print(len(ciphertext))
-    #print(string.ascii_uppercase)
-    #print(p_map)
-    X = convert_to_matrix(plaintexts)
-    Y = convert_to_matrix(ciphertexts)
-
-    K = np.dot(np.linalg.inv(X) % 31, Y) % 31
-    print(K)
-    print(encrypt('CTRL', K))
-    print(encrypt('CAPS', K))
-    print(encrypt('HOME', K))
-    print(encrypt('PGUP', K))
-
-
-    """
-    test_plaintext = ""
-    for ciphertext in textwrap.wrap(test_ciphertext, m):
-        test_plaintext += decrypt(ciphertext, K)
-
-    print(test_plaintext)
-    """
+    p = np.dot(c, key) % 31
+    return ''.join([c_map[n] for n in p])
 
 
 def sub_matrix(matrix, i, j):
@@ -119,18 +94,12 @@ def sub_determinant(matrix, i, j, mod=31):
     return int(round(np.linalg.det(sm))) % mod
 
 
-if __name__ == "__main__":
+
+
+def textbook_hill_cipher_inverse():
     K = np.array([[17, 17, 5],
                   [21, 18, 21],
                   [2, 2, 19]])
-    """
-    sm = sub_matrix(K, 1, 2)
-    print(sm)
-    dsm = sub_determinant(K, 1, 2)
-    print(dsm)
-    exit(1)
-    """
-
 
     print(K)
     det_K = int(round(np.linalg.det(K))) % 26
@@ -142,7 +111,7 @@ if __name__ == "__main__":
     print(inverse)
     for a in range(3):
         for b in range(3):
-            inverse[a].append(m_inv * (-1)**(a+b) * sub_determinant(K, a, b, 26))
+            inverse[a].append(m_inv * (-1) ** (a + b) * sub_determinant(K, a, b, 26))
 
     inverse = np.array(inverse) % 26
     print("K^-1 = \n", inverse)
@@ -150,4 +119,59 @@ if __name__ == "__main__":
 
 
 
+def main():
+    X = convert_to_matrix(plaintexts)
+    Y = convert_to_matrix(ciphertexts)
 
+    print(X)
+    det_X = int(round(np.linalg.det(X))) % 31
+    print("Determinant of X =", det_X)
+    m_inv = multiplicative_inverse(det_X, 31) % 31
+    print("(det X)^-1 mod 31 =", m_inv)
+
+    X_inv = [[] for _ in range(m)]
+    for i in range(m):
+        for j in range(m):
+            X_inv[i].append(m_inv * (-1) ** (i + j) * sub_determinant(X, i, j))
+
+    X_inv = np.array(X_inv) % 31
+
+    print("X^-1 = \n", X_inv)
+    print("X.X^-1 = \n", np.dot(X, X_inv) % 31)
+    K = np.dot(X_inv, Y) % 31
+
+
+
+    print("K = \n", K)
+
+    det_K = int(round(np.linalg.det(K))) % 31
+    print("Determinant of K =", det_X)
+    m_inv = multiplicative_inverse(det_K, 31) % 31
+    print("(det K)^-1 mod 31 =", m_inv)
+
+    K_inv = [[] for _ in range(m)]
+    for i in range(m):
+        for j in range(m):
+            K_inv[i].append(m_inv * (-1) ** (i + j) * sub_determinant(K, i, j))
+
+    K_inv = np.array(K_inv) % 31
+    print("K^-1 = \n", K_inv)
+    print("K.K^-1 = \n", np.dot(K, K_inv) % 31)
+
+    debug = True
+    if debug:
+        print(encrypt('CTRL', K))
+        print(encrypt('CAPS', K))
+        print(encrypt('HOME', K))
+        print(encrypt('PGUP', K))
+
+
+        for c in ciphertexts:
+            print(decrypt(c, K_inv))
+
+
+
+
+
+if __name__ == "__main__":
+    main()
