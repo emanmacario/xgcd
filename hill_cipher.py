@@ -6,9 +6,7 @@ import math
 from extended_euclid import multiplicative_inverse
 
 m = 4
-
-test_ciphertext = """!LPUMYAIJ?.MPA.DVRFUTNRUZYEFM?QVKJTOBTDRIAN!?SLQBKESZO
-SFRAAWYPI.VBOLLMWAWEMQ.JYBOITGNJRIFYGEGIBC?RB?UN?MORI"""
+test_ciphertext = "!LPUMYAIJ?.MPA.DVRFUTNRUZYEFM?QVKJTOBTDRIAN!?SLQBKESZOSFRAAWYPI.VBOLLMWAWEMQ.JYBOITGNJRIFYGEGIBC?RB?UN?MORI,"
 
 p_map = {}
 for n, l in enumerate(string.ascii_uppercase):
@@ -158,19 +156,20 @@ def main():
     print("K^-1 = \n", K_inv)
     print("K.K^-1 = \n", np.dot(K, K_inv) % 31)
 
-    debug = True
+    debug = False
     if debug:
-        print(encrypt('CTRL', K))
-        print(encrypt('CAPS', K))
-        print(encrypt('HOME', K))
-        print(encrypt('PGUP', K))
-
+        for p in plaintexts:
+            print(encrypt(p, K))
 
         for c in ciphertexts:
             print(decrypt(c, K_inv))
 
+    test_plaintext = ""
+    for c in textwrap.wrap(test_ciphertext, m):
+        test_plaintext += decrypt(c, K_inv)
 
-
+    print("TEST PLAINTEXT:")
+    print(test_plaintext)
 
 
 if __name__ == "__main__":
