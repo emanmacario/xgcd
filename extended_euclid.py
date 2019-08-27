@@ -61,9 +61,12 @@ def multiplicative_inverse(a, b):
 
 
 if __name__ == "__main__":
-    a = 156
-    b = 179
-    extended_gcd(b, a)
+    a = 10**100 - 24**13
+    b = 26**45
+    extended_gcd(a, b)
+
+
+
     print("\n")
     multiplicative_inverse(a, b)
 

@@ -11,11 +11,7 @@ test_ciphertext = "!LPUMYAIJ?.MPA.DVRFUTNRUZYEFM?QVKJTOBTDRIAN!?SLQBKESZOSFRAAWY
 p_map = {}
 for n, l in enumerate(string.ascii_uppercase):
     p_map[l] = n
-p_map[','] = 26
-p_map['.'] = 27
-p_map['?'] = 28
-p_map['!'] = 29
-p_map[' '] = 30
+p_map.update({',': 26, '.': 27, '?': 28, '!': 29, ' ': 30})
 
 c_map = {c: p for p, c in p_map.items()}
 
@@ -121,7 +117,12 @@ def main():
     X = convert_to_matrix(plaintexts)
     Y = convert_to_matrix(ciphertexts)
 
+    print("X =")
     print(X)
+    print("Y =")
+    print(Y)
+
+
     det_X = int(round(np.linalg.det(X))) % 31
     print("Determinant of X =", det_X)
     m_inv = multiplicative_inverse(det_X, 31) % 31
